@@ -1,0 +1,28 @@
+# vim:syntax=apparmor
+# Author: Chris Holcombe <xfactor973 at gmail_com>
+#include <tunables/global>
+
+/usr/bin/ceph-mon {
+  #include <abstractions/base>
+
+  /usr/bin/ceph-mon mr,
+
+  network inet stream,
+  network inet6 stream,
+
+  owner /etc/ceph/* rw,
+  /etc/passwd r,
+
+  /proc/@{pid}/auxv r,
+  /proc/@{pid}/net/dev r,
+
+  /run/ceph/* rw,
+  /tmp/ r,
+  /var/lib/ceph/** rwk,
+  /var/lib/charm/ceph-*/ceph.conf r,
+  /var/log/ceph/* rwk,
+  /var/run/ceph/* rwk,
+  /var/tmp/ r,
+  # Site-specific additions and overrides.
+  #include <local/usr.bin.ceph-mon>
+}

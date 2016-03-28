@@ -156,3 +156,9 @@ options:
     description: |
         Apply system hardening. Supports a space-delimited list of modules
         to run. Supported modules currently include os, ssh, apache and mysql.
+  aa-profile-mode:
+    type: string
+    default: 'complain'
+    description: |
+      Enable apparmor profile. Valid settings: 'complain', 'enforce' or 'disable'.
+      AA complain by default.
