@@ -220,7 +220,3 @@ class TestCephOps(unittest.TestCase):
                            }]})
         rc = ceph_broker.process_requests(reqs)
         self.assertEqual(json.loads(rc)['exit-code'], 1)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -13,9 +13,8 @@
 # limitations under the License.
 
 import json
-import unittest
-
 import mock
+import unittest
 
 import ceph_broker
 

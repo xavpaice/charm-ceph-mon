@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import time
 
 from mock import patch, call, MagicMock
-import sys
 
 import test_utils
 

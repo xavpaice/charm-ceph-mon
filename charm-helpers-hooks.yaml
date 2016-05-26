@@ -8,6 +8,10 @@ include:
     - payload.execd
     - contrib.openstack
     - contrib.network.ip
+    - contrib.openstack:
+        - alternatives
+        - exceptions
+        - utils
     - contrib.charmsupport
     - contrib.hardening|inc=*
     - contrib.python.packages
