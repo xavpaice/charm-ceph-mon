@@ -56,6 +56,33 @@ options:
       How many nodes to wait for before trying to create the monitor cluster
       this number needs to be odd, and more than three is a waste except for
       very large clusters.
+  expected-osd-count:
+    type: int
+    default: 0
+    description: |
+      Provides an expected number of OSDs for the cluster. This value is used
+      when calculating the number of placement groups for a pool creation.
+      The number of placement groups for new pools are based upon the actual
+      number of OSDs in the cluster or the expected-osd-count, whichever is
+      greater. A value of 0 will cause the charm to only consider the OSDs
+      which are in the cluster.
+  pgs-per-osd:
+    type: int
+    default: 100
+    description: |
+      The number of placement groups per OSD to target. It is important to
+      properly size the number of placement groups per OSD as too many
+      or too few placement groups oer OSD may cause resource constraints and
+      performance degradation. This value comes from the recommendation of
+      the Ceph placement group calculator (http://ceph.com/pgcalc/) and
+      recommended values are:
+      .
+      100 - If the cluster OSD count is not expected to increase in the
+            foreseeable future.
+      200 - If the cluster OSD count is expected to increase (up to 2x) in the
+            foreseeable future.
+      300 - If the cluster OSD count is expected to increase between 2x and 3x
+            in the foreseeable future.
   source:
     type: string
     default:
