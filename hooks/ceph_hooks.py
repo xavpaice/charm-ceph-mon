@@ -42,7 +42,7 @@ from charmhelpers.core.hookenv import (
     service_name,
     relations_of_type,
     status_set,
-    local_unit)
+    local_unit, ERROR)
 from charmhelpers.core.host import (
     service_restart,
     mkdir,
@@ -281,8 +281,8 @@ def install_apparmor_profile():
     aa_mode = config('aa-profile-mode')
     if aa_mode not in app_armor_modes:
         log('Invalid apparmor mode: {}.  Defaulting to complain'.format(
-            aa_mode), level='error')
-    aa_mode = 'complain'
+            aa_mode), level=ERROR)
+        aa_mode = 'complain'
     apparmor_dir = os.path.join(os.sep,
                                 'etc',
                                 'apparmor.d',
@@ -298,7 +298,8 @@ def install_apparmor_profile():
             subprocess.check_output(cmd)
         except subprocess.CalledProcessError as err:
             log('{} failed with error {}'.format(
-                app_armor_modes[aa_mode], err.output), level='error')
+                app_armor_modes[aa_mode], err.output), level=ERROR)
+            raise
 
 
 @hooks.hook('install.real')

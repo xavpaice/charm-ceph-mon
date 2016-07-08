@@ -13,8 +13,8 @@
   owner /etc/ceph/* rw,
   /etc/passwd r,
 
-  /proc/@{pid}/auxv r,
-  /proc/@{pid}/net/dev r,
+  @{PROC}/@{pid}/auxv r,
+  @{PROC}/@{pid}/net/dev r,
 
   /run/ceph/* rw,
   /tmp/ r,
@@ -23,6 +23,4 @@
   /var/log/ceph/* rwk,
   /var/run/ceph/* rwk,
   /var/tmp/ r,
-  # Site-specific additions and overrides.
-  #include <local/usr.bin.ceph-mon>
 }
