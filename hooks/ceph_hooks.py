@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
 
 import os
 import random
@@ -22,7 +21,6 @@ import subprocess
 import sys
 import uuid
 import time
-import shutil
 
 import ceph
 from charmhelpers.core import host
@@ -42,7 +40,7 @@ from charmhelpers.core.hookenv import (
     service_name,
     relations_of_type,
     status_set,
-    local_unit, ERROR)
+    local_unit)
 from charmhelpers.core.host import (
     service_restart,
     mkdir,
@@ -83,12 +81,6 @@ from charmhelpers.contrib.charmsupport import nrpe
 from charmhelpers.contrib.hardening.harden import harden
 
 hooks = Hooks()
-
-app_armor_modes = {
-    'complain': 'aa-complain',
-    'disabled': 'aa-disable',
-    'enforce': 'aa-enforce',
-}
 
 NAGIOS_PLUGINS = '/usr/local/lib/nagios/plugins'
 SCRIPTS_DIR = '/usr/local/bin'
@@ -276,32 +268,6 @@ def upgrade_monitor():
         sys.exit(1)
 
 
-def install_apparmor_profile():
-    log('Installing app-armor-profiles')
-    aa_mode = config('aa-profile-mode')
-    if aa_mode not in app_armor_modes:
-        log('Invalid apparmor mode: {}.  Defaulting to complain'.format(
-            aa_mode), level=ERROR)
-        aa_mode = 'complain'
-    apparmor_dir = os.path.join(os.sep,
-                                'etc',
-                                'apparmor.d',
-                                'local')
-
-    for x in glob.glob('files/apparmor/*'):
-        shutil.copy(x, apparmor_dir)
-        try:
-            cmd = [
-                app_armor_modes[aa_mode],
-                os.path.join(apparmor_dir, os.path.split(x)[-1])
-            ]
-            subprocess.check_output(cmd)
-        except subprocess.CalledProcessError as err:
-            log('{} failed with error {}'.format(
-                app_armor_modes[aa_mode], err.output), level=ERROR)
-            raise
-
-
 @hooks.hook('install.real')
 @harden()
 def install():
@@ -408,7 +374,6 @@ def config_changed():
         status_set('maintenance', 'Bootstrapping single Ceph MON')
         ceph.bootstrap_monitor_cluster(config('monitor-secret'))
         ceph.wait_for_bootstrap()
-    install_apparmor_profile()
 
 
 def get_mon_hosts():
