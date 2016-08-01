@@ -20,7 +20,7 @@ from mock import (
     patch,
 )
 
-from hooks import ceph_broker
+from ceph.ceph import ceph_broker
 
 
 class TestCephOps(unittest.TestCase):
