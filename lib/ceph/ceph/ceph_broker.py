@@ -22,7 +22,7 @@ from charmhelpers.core.hookenv import (
     INFO,
     ERROR,
 )
-from charmhelpers.contrib.storage.linux.ceph import (
+from charmhelpers.contrib.storage.linux.ceph  import (
     create_erasure_profile,
     delete_pool,
     erasure_profile_exists,
