@@ -26,8 +26,10 @@ sys.modules['apt'] = mock_apt
 mock_apt.apt_pkg = MagicMock()
 
 with patch('charmhelpers.contrib.hardening.harden.harden') as mock_dec:
-    mock_dec.side_effect = (lambda *dargs, **dkwargs: lambda f:
-                            lambda *args, **kwargs: f(*args, **kwargs))
+    mock_dec.side_effect = (
+        lambda *dargs,
+        **dkwargs: lambda f: lambda *args,
+        **kwargs: f(*args, **kwargs))
     import ceph_hooks
 
 TO_PATCH = [
@@ -60,10 +62,10 @@ previous_node_start_time = time.time() - (9 * 60)
 
 def monitor_key_side_effect(*args):
     if args[1] == \
-            'ip-192-168-1-2_done':
+            'ip-192-168-1-2_0.94.1_done':
         return False
     elif args[1] == \
-            'ip-192-168-1-2_start':
+            'ip-192-168-1-2_0.94.1_start':
         # Return that the previous node started 9 minutes ago
         return previous_node_start_time
 
@@ -89,7 +91,8 @@ class UpgradeRollingTestCase(test_utils.CharmTestCase):
     @patch('ceph_hooks.monitor_key_set')
     def test_lock_and_roll(self, monitor_key_set, upgrade_monitor):
         monitor_key_set.monitor_key_set.return_value = None
-        ceph_hooks.lock_and_roll(my_name='ip-192-168-1-2')
+        ceph_hooks.lock_and_roll(my_name='ip-192-168-1-2',
+                                 version='0.94.1')
         upgrade_monitor.assert_called_once_with()
 
     def test_upgrade_monitor(self):
@@ -119,6 +122,7 @@ class UpgradeRollingTestCase(test_utils.CharmTestCase):
                                          get_mon_map,
                                          wait_on_previous_node,
                                          lock_and_roll):
+        self.ceph.get_version.return_value = "0.94.1"
         wait_on_previous_node.return_value = None
         socket.gethostname.return_value = "ip-192-168-1-3"
         get_mon_map.return_value = {
@@ -133,11 +137,12 @@ class UpgradeRollingTestCase(test_utils.CharmTestCase):
                 ]
             }
         }
-        ceph_hooks.roll_monitor_cluster('0.94.1')
+        ceph_hooks.roll_monitor_cluster(new_version='0.94.1')
         self.status_set.assert_called_with(
             'blocked',
             'Waiting on ip-192-168-1-2 to finish upgrading')
-        lock_and_roll.assert_called_with(my_name="ip-192-168-1-3")
+        lock_and_roll.assert_called_with(my_name="ip-192-168-1-3",
+                                         version='0.94.1')
 
     @patch.object(ceph_hooks, 'time')
     @patch('ceph_hooks.monitor_key_get')
@@ -154,15 +159,15 @@ class UpgradeRollingTestCase(test_utils.CharmTestCase):
         monitor_key_get.side_effect = monitor_key_side_effect
         monitor_key_exists.return_value = False
 
-        ceph_hooks.wait_on_previous_node("ip-192-168-1-2")
+        ceph_hooks.wait_on_previous_node("ip-192-168-1-2", version='0.94.1')
 
         # Make sure we checked to see if the previous node started
         monitor_key_get.assert_has_calls(
-            [call('admin', 'ip-192-168-1-2_start')]
+            [call('admin', 'ip-192-168-1-2_0.94.1_start')]
         )
         # Make sure we checked to see if the previous node was finished
         monitor_key_exists.assert_has_calls(
-            [call('admin', 'ip-192-168-1-2_done')]
+            [call('admin', 'ip-192-168-1-2_0.94.1_done')]
         )
         # Make sure we waited at last once before proceeding
         self.log.assert_has_calls(
