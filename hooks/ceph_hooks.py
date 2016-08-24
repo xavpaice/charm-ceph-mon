@@ -488,6 +488,8 @@ def notify_radosgws():
 def notify_client():
     for relid in relation_ids('client'):
         client_relation_joined(relid)
+    for relid in relation_ids('admin'):
+        admin_relation_joined(relid)
 
 
 def upgrade_keys():
@@ -574,6 +576,22 @@ def radosgw_relation(relid=None, unit=None):
         relation_set(relation_id=relid, relation_settings=data)
     else:
         log('mon cluster not in quorum or no osds - deferring key provision')
+
+
+@hooks.hook('admin-relation-changed')
+@hooks.hook('admin-relation-joined')
+def admin_relation_joined(relid=None):
+    if ceph.is_quorum():
+        log('mon cluster in quorum - providing client with keys')
+        data = {'key': ceph.get_named_key(name='admin', caps=ceph.admin_caps),
+                'fsid': leader_get('fsid'),
+                'auth': config('auth-supported'),
+                'mon_hosts': " ".join(get_mon_hosts())
+                }
+        relation_set(relation_id=relid,
+                     relation_settings=data)
+    else:
+        log('mon cluster not in quorum - deferring key provision')
 
 
 @hooks.hook('client-relation-joined')
