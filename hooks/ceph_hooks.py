@@ -137,11 +137,14 @@ def check_for_upgrade():
                                              pretty_print_upgrade_paths()))
 
 
-def lock_and_roll(my_name):
+def lock_and_roll(my_name, version):
     start_timestamp = time.time()
 
-    log('monitor_key_set {}_start {}'.format(my_name, start_timestamp))
-    monitor_key_set('admin', "{}_start".format(my_name), start_timestamp)
+    log('monitor_key_set {}_{}_start {}'.format(my_name,
+                                                version,
+                                                start_timestamp))
+    monitor_key_set('admin', "{}_{}_start".format(my_name, version),
+                    start_timestamp)
     log("Rolling")
     # This should be quick
     upgrade_monitor()
@@ -149,16 +152,19 @@ def lock_and_roll(my_name):
 
     stop_timestamp = time.time()
     # Set a key to inform others I am finished
-    log('monitor_key_set {}_done {}'.format(my_name, stop_timestamp))
-    monitor_key_set('admin', "{}_done".format(my_name), stop_timestamp)
+    log('monitor_key_set {}_{}_done {}'.format(my_name,
+                                               version,
+                                               stop_timestamp))
+    monitor_key_set('admin', "{}_{}_done".format(my_name, version),
+                    stop_timestamp)
 
 
-def wait_on_previous_node(previous_node):
+def wait_on_previous_node(previous_node, version):
     log("Previous node is: {}".format(previous_node))
 
     previous_node_finished = monitor_key_exists(
         'admin',
-        "{}_done".format(previous_node))
+        "{}_{}_done".format(previous_node, version))
 
     while previous_node_finished is False:
         log("{} is not finished. Waiting".format(previous_node))
@@ -172,7 +178,7 @@ def wait_on_previous_node(previous_node):
         current_timestamp = time.time()
         previous_node_start_time = monitor_key_get(
             'admin',
-            "{}_start".format(previous_node))
+            "{}_{}_start".format(previous_node, version))
         if (current_timestamp - (10 * 60)) > previous_node_start_time:
             # Previous node is probably dead.  Lets move on
             if previous_node_start_time is not None:
@@ -191,7 +197,7 @@ def wait_on_previous_node(previous_node):
             time.sleep(wait_time)
             previous_node_finished = monitor_key_exists(
                 'admin',
-                "{}_done".format(previous_node))
+                "{}_{}_done".format(previous_node, version))
 
 
 # Edge cases:
@@ -224,14 +230,15 @@ def roll_monitor_cluster(new_version):
         if position == 0:
             # I'm first!  Roll
             # First set a key to inform others I'm about to roll
-            lock_and_roll(my_name=my_name)
+            lock_and_roll(my_name=my_name, version=new_version)
         else:
             # Check if the previous node has finished
             status_set('blocked',
                        'Waiting on {} to finish upgrading'.format(
                            mon_sorted_list[position - 1]))
-            wait_on_previous_node(previous_node=mon_sorted_list[position - 1])
-            lock_and_roll(my_name=my_name)
+            wait_on_previous_node(previous_node=mon_sorted_list[position - 1],
+                                  version=new_version)
+            lock_and_roll(my_name=my_name, version=new_version)
     except ValueError:
         log("Failed to find {} in list {}.".format(
             my_name, mon_sorted_list))
