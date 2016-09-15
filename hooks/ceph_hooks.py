@@ -589,8 +589,11 @@ def radosgw_relation(relid=None, unit=None):
 @hooks.hook('admin-relation-joined')
 def admin_relation_joined(relid=None):
     if ceph.is_quorum():
+        name = relation_get('keyring-name')
+        if name is None:
+            name = 'admin'
         log('mon cluster in quorum - providing client with keys')
-        data = {'key': ceph.get_named_key(name='admin', caps=ceph.admin_caps),
+        data = {'key': ceph.get_named_key(name=name, caps=ceph.admin_caps),
                 'fsid': leader_get('fsid'),
                 'auth': config('auth-supported'),
                 'mon_hosts': " ".join(get_mon_hosts())
