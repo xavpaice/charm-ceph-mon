@@ -342,6 +342,9 @@ def notify_client():
         client_relation_joined(relid)
     for relid in relation_ids('admin'):
         admin_relation_joined(relid)
+    for relid in relation_ids('mds'):
+        for unit in related_units(relid):
+            mds_relation_joined(relid=relid, unit=unit)
 
 
 def upgrade_keys():
@@ -428,6 +431,44 @@ def radosgw_relation(relid=None, unit=None):
         relation_set(relation_id=relid, relation_settings=data)
     else:
         log('mon cluster not in quorum or no osds - deferring key provision')
+
+
+@hooks.hook('mds-relation-changed')
+@hooks.hook('mds-relation-joined')
+def mds_relation_joined(relid=None, unit=None):
+    if ceph.is_quorum() and related_osds():
+        log('mon cluster in quorum and OSDs related'
+            '- providing client with keys')
+        service_name = None
+        if not unit:
+            unit = remote_unit()
+        if relid is None:
+            units = [remote_unit()]
+            service_name = units[0].split('/')[0]
+        else:
+            units = related_units(relid)
+            if len(units) > 0:
+                service_name = units[0].split('/')[0]
+
+        if service_name is not None:
+            public_addr = get_public_addr()
+            data = {'key': ceph.get_mds_key(service_name),
+                    'auth': config('auth-supported'),
+                    'ceph-public-address': public_addr}
+            settings = relation_get(rid=relid, unit=unit)
+            """Process broker request(s)."""
+            if 'broker_req' in settings:
+                if ceph.is_leader():
+                    rsp = process_requests(settings['broker_req'])
+                    unit_id = unit.replace('/', '-')
+                    unit_response_key = 'broker-rsp-' + unit_id
+                    data[unit_response_key] = rsp
+                else:
+                    log("Not leader - ignoring broker request", level=DEBUG)
+
+            relation_set(relation_id=relid, relation_settings=data)
+    else:
+        log('mon cluster not in quorum - deferring key provision')
 
 
 @hooks.hook('admin-relation-changed')

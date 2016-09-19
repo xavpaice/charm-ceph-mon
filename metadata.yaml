@@ -24,6 +24,8 @@ provides:
   nrpe-external-master:
     interface: nrpe-external-master
     scope: container
+  mds:
+    interface: ceph-mds
   admin:
     interface: ceph-admin
   client:
