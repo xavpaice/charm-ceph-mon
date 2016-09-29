@@ -454,7 +454,7 @@ def mds_relation_joined(relid=None, unit=None):
             public_addr = get_public_addr()
             data = {
                 'fsid': leader_get('fsid'),
-                'key': ceph.get_mds_key(service_name),
+                'mds_bootstrap_key': ceph.get_mds_bootstrap_key(),
                 'auth': config('auth-supported'),
                 'ceph-public-address': public_addr}
             settings = relation_get(rid=relid, unit=unit)
