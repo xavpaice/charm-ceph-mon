@@ -424,7 +424,7 @@ def handle_create_cephfs(request, service):
         log("CephFS already created")
         return
 
-        # Finally create CephFS
+    # Finally create CephFS
     try:
         check_output(["ceph",
                       '--id', service,

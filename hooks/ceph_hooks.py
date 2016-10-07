@@ -439,36 +439,27 @@ def mds_relation_joined(relid=None, unit=None):
     if ceph.is_quorum() and related_osds():
         log('mon cluster in quorum and OSDs related'
             '- providing client with keys')
-        service_name = None
+        mds_name = relation_get('mds-name')
         if not unit:
             unit = remote_unit()
-        if relid is None:
-            units = [remote_unit()]
-            service_name = units[0].split('/')[0]
-        else:
-            units = related_units(relid)
-            if len(units) > 0:
-                service_name = units[0].split('/')[0]
+        public_addr = get_public_addr()
+        data = {
+            'fsid': leader_get('fsid'),
+            'mds_key': ceph.get_mds_key(name=mds_name),
+            'auth': config('auth-supported'),
+            'ceph-public-address': public_addr}
+        settings = relation_get(rid=relid, unit=unit)
+        """Process broker request(s)."""
+        if 'broker_req' in settings:
+            if ceph.is_leader():
+                rsp = process_requests(settings['broker_req'])
+                unit_id = unit.replace('/', '-')
+                unit_response_key = 'broker-rsp-' + unit_id
+                data[unit_response_key] = rsp
+            else:
+                log("Not leader - ignoring broker request", level=DEBUG)
 
-        if service_name is not None:
-            public_addr = get_public_addr()
-            data = {
-                'fsid': leader_get('fsid'),
-                'mds_bootstrap_key': ceph.get_mds_bootstrap_key(),
-                'auth': config('auth-supported'),
-                'ceph-public-address': public_addr}
-            settings = relation_get(rid=relid, unit=unit)
-            """Process broker request(s)."""
-            if 'broker_req' in settings:
-                if ceph.is_leader():
-                    rsp = process_requests(settings['broker_req'])
-                    unit_id = unit.replace('/', '-')
-                    unit_response_key = 'broker-rsp-' + unit_id
-                    data[unit_response_key] = rsp
-                else:
-                    log("Not leader - ignoring broker request", level=DEBUG)
-
-            relation_set(relation_id=relid, relation_settings=data)
+        relation_set(relation_id=relid, relation_settings=data)
     else:
         log('mon cluster not in quorum - deferring key provision')
 
