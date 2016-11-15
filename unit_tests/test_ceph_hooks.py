@@ -2,7 +2,7 @@ import copy
 import unittest
 import sys
 
-from mock import patch, MagicMock, DEFAULT
+from mock import patch, MagicMock, DEFAULT, call
 
 # python-apt is not installed as part of test-requirements but is imported by
 # some charmhelpers modules so create a fake import.
@@ -143,3 +143,46 @@ class CephHooksTestCase(unittest.TestCase):
             ceph_hooks.upgrade_charm()
         mocks["apt_install"].assert_called_with(
             ["python-dbus", "lockfile-progs"])
+
+
+class RelatedUnitsTestCase(unittest.TestCase):
+
+    _units = {
+        'osd:0': ['ceph-osd-a/0',
+                  'ceph-osd-a/1',
+                  'ceph-osd-a/2'],
+        'osd:23': ['ceph-osd-b/1',
+                   'ceph-osd-b/2',
+                   'ceph-osd-b/3'],
+    }
+
+    def setUp(self):
+        super(RelatedUnitsTestCase, self).setUp()
+
+    @patch.object(ceph_hooks, 'relation_ids')
+    @patch.object(ceph_hooks, 'related_units')
+    def test_related_ods_single_relation(self,
+                                         related_units,
+                                         relation_ids):
+        relation_ids.return_value = ['osd:0']
+        related_units.side_effect = lambda x: self._units.get(x)
+        self.assertTrue(ceph_hooks.related_osds())
+        self.assertFalse(ceph_hooks.related_osds(6))
+        relation_ids.assert_called_with('osd')
+        related_units.assert_called_with('osd:0')
+
+    @patch.object(ceph_hooks, 'relation_ids')
+    @patch.object(ceph_hooks, 'related_units')
+    def test_related_ods_multi_relation(self,
+                                        related_units,
+                                        relation_ids):
+        relation_ids.return_value = ['osd:0', 'osd:23']
+        related_units.side_effect = lambda x: self._units.get(x)
+        self.assertTrue(ceph_hooks.related_osds())
+        self.assertTrue(ceph_hooks.related_osds(6))
+        self.assertFalse(ceph_hooks.related_osds(9))
+        relation_ids.assert_called_with('osd')
+        related_units.assert_has_calls([
+            call('osd:0'),
+            call('osd:23')
+        ])
