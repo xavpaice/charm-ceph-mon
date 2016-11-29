@@ -33,6 +33,7 @@ from charmhelpers.core.hookenv import (
     config,
     relation_ids,
     related_units,
+    is_relation_made,
     relation_get,
     relation_set,
     leader_set, leader_get,
@@ -547,6 +548,8 @@ def upgrade_charm():
     ceph.update_monfs()
     upgrade_keys()
     mon_relation_joined()
+    if is_relation_made("nrpe-external-master"):
+        update_nrpe_config()
 
 
 @hooks.hook('start')
@@ -563,7 +566,7 @@ def start():
 @hooks.hook('nrpe-external-master-relation-changed')
 def update_nrpe_config():
     # python-dbus is used by check_upstart_job
-    apt_install('python-dbus')
+    apt_install(['python-dbus', 'lockfile-progs'])
     log('Refreshing nagios checks')
     if os.path.isdir(NAGIOS_PLUGINS):
         rsync(os.path.join(os.getenv('CHARM_DIR'), 'files', 'nagios',

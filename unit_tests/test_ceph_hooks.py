@@ -2,7 +2,7 @@ import copy
 import unittest
 import sys
 
-from mock import patch, MagicMock
+from mock import patch, MagicMock, DEFAULT
 
 # python-apt is not installed as part of test-requirements but is imported by
 # some charmhelpers modules so create a fake import.
@@ -115,3 +115,32 @@ class CephHooksTestCase(unittest.TestCase):
                     'public_addr': '10.0.0.1',
                     'use_syslog': 'true'}
         self.assertEqual(ctxt, expected)
+
+    def test_nrpe_dependency_installed(self):
+        with patch.multiple(ceph_hooks,
+                            apt_install=DEFAULT,
+                            rsync=DEFAULT,
+                            log=DEFAULT,
+                            write_file=DEFAULT,
+                            nrpe=DEFAULT) as mocks:
+            ceph_hooks.update_nrpe_config()
+        mocks["apt_install"].assert_called_once_with(
+            ["python-dbus", "lockfile-progs"])
+
+    def test_upgrade_charm_with_nrpe_relation_installs_dependencies(self):
+        with patch.multiple(
+                ceph_hooks,
+                apt_install=DEFAULT,
+                rsync=DEFAULT,
+                log=DEFAULT,
+                write_file=DEFAULT,
+                nrpe=DEFAULT,
+                emit_cephconf=DEFAULT,
+                upgrade_keys=DEFAULT,
+                mon_relation_joined=DEFAULT,
+                is_relation_made=DEFAULT) as mocks, patch(
+                    "charmhelpers.contrib.hardening.harden.config"):
+            mocks["is_relation_made"].return_value = True
+            ceph_hooks.upgrade_charm()
+        mocks["apt_install"].assert_called_with(
+            ["python-dbus", "lockfile-progs"])
