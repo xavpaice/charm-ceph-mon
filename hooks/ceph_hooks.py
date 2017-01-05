@@ -393,6 +393,7 @@ def osd_relation(relid=None):
         # NOTE: radosgw key provision is gated on presence of OSD
         #       units so ensure that any deferred hooks are processed
         notify_radosgws()
+        notify_client()
     else:
         log('mon cluster not in quorum - deferring fsid provision')
 
@@ -453,7 +454,7 @@ def radosgw_relation(relid=None, unit=None):
 def mds_relation_joined(relid=None, unit=None):
     if ceph.is_quorum() and related_osds():
         log('mon cluster in quorum and OSDs related'
-            '- providing client with keys')
+            '- providing mds client with keys')
         mds_name = relation_get('mds-name')
         if not unit:
             unit = remote_unit()
@@ -472,11 +473,11 @@ def mds_relation_joined(relid=None, unit=None):
                 unit_response_key = 'broker-rsp-' + unit_id
                 data[unit_response_key] = rsp
             else:
-                log("Not leader - ignoring broker request", level=DEBUG)
+                log("Not leader - ignoring mds broker request", level=DEBUG)
 
         relation_set(relation_id=relid, relation_settings=data)
     else:
-        log('mon cluster not in quorum - deferring key provision')
+        log('Waiting on mon quorum or min osds before provisioning mds keys')
 
 
 @hooks.hook('admin-relation-changed')
