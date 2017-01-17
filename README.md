@@ -54,6 +54,43 @@ You can use the Ceph OSD and Ceph Radosgw charms:
 - [Ceph OSD](https://jujucharms.com/precise/ceph-osd)
 - [Ceph Rados Gateway](https://jujucharms.com/precise/ceph-radosgw)
 
+## Rolling Upgrades
+
+ceph-mon and ceph-osd charms have the ability to initiate a rolling upgrade.
+This is initiated by setting the config value for `source`.  To perform a
+rolling upgrade first set the source for ceph-mon.  Watch `juju status`.
+Once the monitor cluster is upgraded proceed to setting the ceph-osd source
+setting.  Again watch `juju status` for output.  The monitors and osds will
+sort themselves into a known order and upgrade one by one.  As each server is
+upgrading the upgrade code will down all the monitor or osd processes on that
+server, apply the update and then restart them. You will notice in the
+`juju status` output that the servers will tell you which previous server they
+are waiting on.
+
+#### Supported Upgrade Paths
+Currently the following upgrade paths are supported using 
+the [Ubuntu Cloud Archive](https://wiki.ubuntu.com/OpenStack/CloudArchive):
+- trusty-firefly -> trusty-hammer
+- trusty-hammer -> trusty-jewel
+
+Firefly is available in Trusty, Hammer is in Trusty-Juno (end of life),
+Trusty-Kilo, Trusty-Liberty, and Jewel is available in Trusty-Mitaka.
+
+For example if the current config source setting is: `cloud:trusty-liberty`
+changing that to `cloud:trusty-mitaka` will initiate a rolling upgrade of 
+the monitor cluster from hammer to jewel.
+
+#### Edge cases
+There's an edge case in the upgrade code where if the previous node never
+starts upgrading itself then the rolling upgrade can hang forever.  If you
+notice this has happened it can be fixed by setting the appropriate key in the
+ceph monitor cluster. The monitor cluster will have
+keys that look like `ceph-mon_ip-ceph-mon-0_1484680239.573482_start` and
+`ceph-mon_ip-ceph-mon-0_1484680274.181742_stop`. What each server is looking for
+is that stop key to indicate that the previous server upgraded successfully and
+it's safe to take itself down.  If the stop key is not present it will wait
+10 minutes, then consider that server dead and move on.
+
 ## Network Space support
 
 This charm supports the use of Juju Network Spaces, allowing the charm to be bound to network space configurations managed directly by Juju.  This is only supported with Juju 2.0 and above.
@@ -79,7 +116,7 @@ Please refer to the [Ceph Network Reference](http://docs.ceph.com/docs/master/ra
 
 # Contact Information
 
-## Authors 
+## Authors
 
 - Paul Collins <paul.collins@canonical.com>,
 - James Page <james.page@ubuntu.com>
