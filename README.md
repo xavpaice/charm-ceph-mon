@@ -51,8 +51,8 @@ This charm supports pausing and resuming ceph's health functions on a cluster, f
 
 You can use the Ceph OSD and Ceph Radosgw charms:
 
-- [Ceph OSD](https://jujucharms.com/precise/ceph-osd)
-- [Ceph Rados Gateway](https://jujucharms.com/precise/ceph-radosgw)
+- [Ceph OSD](https://jujucharms.com/ceph-osd)
+- [Ceph Rados Gateway](https://jujucharms.com/ceph-radosgw)
 
 ## Network Space support
 
@@ -79,7 +79,7 @@ Please refer to the [Ceph Network Reference](http://docs.ceph.com/docs/master/ra
 
 # Contact Information
 
-## Authors 
+## Authors
 
 - Paul Collins <paul.collins@canonical.com>,
 - James Page <james.page@ubuntu.com>
