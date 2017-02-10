@@ -482,7 +482,8 @@ def mds_relation_joined(relid=None, unit=None):
     if ceph.is_quorum() and related_osds():
         log('mon cluster in quorum and OSDs related'
             '- providing mds client with keys')
-        mds_name = relation_get('mds-name')
+        mds_name = relation_get(attribute='mds-name',
+                                rid=relid, unit=unit)
         if not unit:
             unit = remote_unit()
         public_addr = get_public_addr()
