@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import decimal
 import os
 import subprocess
 import sys
@@ -45,7 +44,7 @@ from charmhelpers.core.hookenv import (
     relations_of_type,
     status_set,
     local_unit,
-    application_version_set, INFO, ERROR, add_metric)
+    application_version_set)
 from charmhelpers.core.host import (
     service_restart,
     mkdir,
@@ -114,48 +113,6 @@ def check_for_upgrade():
             "Valid paths are: {}".format(old_version,
                                          new_version,
                                          ceph.pretty_print_upgrade_paths()))
-
-
-@hooks.hook('collect-metrics')
-def collect_metrics():
-    if not is_leader():
-        # Only collect metrics on the leader
-        return
-    log("Collecting metrics")
-    if not ceph.is_quorum():
-        log("Waiting on Ceph monitor quorum before collecting metrics")
-        return
-
-    try:
-        import rados
-
-        cluster = rados.Rados(
-            conffile=os.path.join(os.sep, 'etc', 'ceph', 'ceph.conf'))
-        cluster.connect(timeout=60)  # 1 minute timeout
-        log("Gathering pool stats", level=INFO)
-        pools = cluster.list_pools()
-        kb_used = 0
-        for pool in pools:
-            with cluster.open_ioctx(pool) as ioctx:
-                pool_stats = ioctx.get_stats()
-                kb_used += pool_stats['num_kb']
-                gb_used = str(kb_used / decimal.Decimal(2 ** 20))
-                log("gb_used: {}".format(gb_used), level=INFO)
-            try:
-                add_metric('gb-used={}'.format(gb_used))
-            except EnvironmentError as call_error:
-                log("add-metric failed with error: {},"
-                    "skipping metrics collection".format(str(call_error)),
-                    level=ERROR)
-        log("Disconnecting from Ceph", level=DEBUG)
-        cluster.shutdown()
-    except (rados.IOError,
-            rados.ObjectNotFound,
-            rados.NoData,
-            rados.NoSpace,
-            rados.PermissionError) as rados_error:
-        log("librados failed with error: {}, skipping metrics "
-            "collection".format(str(rados_error)), level=ERROR)
 
 
 @hooks.hook('install.real')
