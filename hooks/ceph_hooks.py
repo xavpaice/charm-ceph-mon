@@ -87,6 +87,10 @@ STATUS_CRONFILE = '/etc/cron.d/cat-ceph-health'
 
 
 def check_for_upgrade():
+    if not ceph.is_bootstrapped():
+        log("Ceph is not bootstrapped, skipping upgrade checks.")
+        return
+
     release_info = host.lsb_release()
     if not release_info['DISTRIB_CODENAME'] == 'trusty':
         log("Invalid upgrade path from {}.  Only trusty is currently "
@@ -180,7 +184,6 @@ def config_changed():
     if config('prefer-ipv6'):
         assert_charm_supports_ipv6()
 
-    # Check if an upgrade was requested
     check_for_upgrade()
 
     log('Monitor hosts are ' + repr(get_mon_hosts()))
