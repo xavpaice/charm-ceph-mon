@@ -380,9 +380,11 @@ def related_osds(num_units=3):
     @return: boolean indicating whether the required number of
              units where detected.
     '''
+    units = 0
     for r_id in relation_ids('osd'):
-        if len(related_units(r_id)) >= num_units:
-            return True
+        units += len(related_units(r_id))
+    if units >= num_units:
+        return True
     return False
 
 
