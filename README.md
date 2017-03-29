@@ -114,6 +114,8 @@ Please refer to the [Ceph Network Reference](http://docs.ceph.com/docs/master/ra
 
 **NOTE**: Existing deployments using ceph-*-network configuration options will continue to function; these options are preferred over any network space binding provided if set.
 
+**NOTE**: The mon-hosts field is only used to migrate existing clusters to a juju managed solution and should be left blank otherwise.
+
 # Contact Information
 
 ## Authors
