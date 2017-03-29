@@ -20,7 +20,8 @@ from charmhelpers.core.hookenv import (
     config,
     status_set,
     network_get_primary_address,
-    log, DEBUG,
+    log,
+    DEBUG,
 )
 from charmhelpers.fetch import (
     apt_install,
@@ -28,7 +29,8 @@ from charmhelpers.fetch import (
 )
 
 from charmhelpers.core.host import (
-    lsb_release
+    lsb_release,
+    CompareHostReleases,
 )
 
 from charmhelpers.contrib.network.ip import (
@@ -146,6 +148,7 @@ def get_network_addrs(config_opt):
 
 def assert_charm_supports_ipv6():
     """Check whether we are able to support charms ipv6."""
-    if lsb_release()['DISTRIB_CODENAME'].lower() < "trusty":
+    _release = lsb_release()['DISTRIB_CODENAME'].lower()
+    if CompareHostReleases(_release) < "trusty":
         raise Exception("IPv6 is not supported in the charms for Ubuntu "
                         "versions less than Trusty 14.04")

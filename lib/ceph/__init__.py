@@ -32,28 +32,42 @@ from charmhelpers.core.host import (
     chownr,
     service_restart,
     lsb_release,
-    cmp_pkgrevno, service_stop, mounts, service_start)
+    cmp_pkgrevno,
+    service_stop,
+    mounts,
+    service_start,
+    CompareHostReleases,
+)
 from charmhelpers.core.hookenv import (
     log,
     ERROR,
     cached,
     status_set,
-    WARNING, DEBUG, config)
+    WARNING,
+    DEBUG,
+    config
+)
 from charmhelpers.core.services import render_template
 from charmhelpers.fetch import (
     apt_cache,
-    add_source, apt_install, apt_update)
+    add_source,
+    apt_install,
+    apt_update
+)
 from charmhelpers.contrib.storage.linux.ceph import (
     monitor_key_set,
     monitor_key_exists,
     monitor_key_get,
-    get_mon_map)
+    get_mon_map
+)
 from charmhelpers.contrib.storage.linux.utils import (
     is_block_device,
     zap_disk,
-    is_device_mounted)
+    is_device_mounted
+)
 from charmhelpers.contrib.openstack.utils import (
-    get_os_codename_install_source)
+    get_os_codename_install_source
+)
 
 LEADER = 'leader'
 PEON = 'peon'
@@ -1153,7 +1167,7 @@ def upgrade_key_caps(key, caps):
 
 @cached
 def systemd():
-    return (lsb_release()['DISTRIB_CODENAME'] >= 'vivid')
+    return CompareHostReleases(lsb_release()['DISTRIB_CODENAME']) >= 'vivid'
 
 
 def bootstrap_monitor_cluster(secret):
