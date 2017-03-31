@@ -56,11 +56,11 @@ options:
       How many nodes to wait for before trying to create the monitor cluster
       this number needs to be odd, and more than three is a waste except for
       very large clusters.
-  mon-hosts:
+  monitor-hosts:
     type: string
     default:
     description: |
-        A comma separated list of ceph mon hosts to use.  This field is only
+        A space separated list of ceph mon hosts to use.  This field is only
         used to migrate an existing cluster to a juju managed solution
         and should be left blank otherwise.
   expected-osd-count:

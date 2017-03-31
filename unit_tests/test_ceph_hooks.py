@@ -22,7 +22,7 @@ CHARM_CONFIG = {'config-flags': '',
                 'osd-journal-size': 1024,
                 'use-direct-io': True,
                 'osd-format': 'ext4',
-                'mon-hosts': '',
+                'monitor-hosts': '',
                 'prefer-ipv6': False}
 
 

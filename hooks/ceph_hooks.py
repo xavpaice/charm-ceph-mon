@@ -137,7 +137,7 @@ def get_ceph_context():
 
     cephcontext = {
         'auth_supported': config('auth-supported'),
-        'mon_hosts': config('mon-hosts') or ' '.join(get_mon_hosts()),
+        'mon_hosts': config('monitor-hosts') or ' '.join(get_mon_hosts()),
         'fsid': leader_get('fsid'),
         'old_auth': cmp_pkgrevno('ceph', "0.51") < 0,
         'use_syslog': str(config('use-syslog')).lower(),
@@ -465,10 +465,11 @@ def admin_relation_joined(relid=None):
         if name is None:
             name = 'admin'
         log('mon cluster in quorum - providing client with keys')
+        mon_hosts = config('monitor-hosts') or ' '.join(get_mon_hosts())
         data = {'key': ceph.get_named_key(name=name, caps=ceph.admin_caps),
                 'fsid': leader_get('fsid'),
                 'auth': config('auth-supported'),
-                'mon_hosts': config('mon-hosts') or " ".join(get_mon_hosts())
+                'mon_hosts': mon_hosts,
                 }
         relation_set(relation_id=relid,
                      relation_settings=data)
