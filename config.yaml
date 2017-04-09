@@ -7,10 +7,13 @@ options:
     type: string
     default:
     description: |
-      fsid of the ceph cluster. To generate a suitable value use `uuid`
-      .
-      This configuration element is mandatory and the service will fail on
-      install if it is not provided.
+      The unique identifier (fsid) of the Ceph cluster.
+
+      To generate a suitable value use `uuid`.
+      If left empty, an fsid will be generated.
+
+      NOTE: Changing this configuration after deployment is not supported and
+      new service units will not be able to join the cluster.
   config-flags:
     type: string
     default:
@@ -43,12 +46,15 @@ options:
     type: string
     default:
     description: |
-      This value will become the mon. key. To generate a suitable value use:
-      .
+      The Ceph secret key used by Ceph monitors. This value will become the
+      mon.key. To generate a suitable value use:
+
         ceph-authtool /dev/stdout --name=mon. --gen-key
-      .
-      This configuration element is mandatory and the service will fail on
-      install if it is not provided.
+
+      If left empty, a secret key will be generated.
+
+      NOTE: Changing this configuration after deployment is not supported and
+      new service units will not be able to join the cluster.
   monitor-count:
     type: int
     default: 3
