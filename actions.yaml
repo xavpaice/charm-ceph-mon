@@ -214,3 +214,22 @@ pool-get:
       description: Any valid Ceph key from http://docs.ceph.com/docs/master/rados/operations/pools/#get-pool-values
   required: [key, pool-name]
   additionalProperties: false
+reweight-osd-slowly:
+  description: Gradually change the crush weight of an OSD till it reaches target
+  params:
+    step-timeout:
+      type: integer
+      description: Number of seconds to wait for health to return to OK each step, default 20 mins
+      default: 1200
+    timeout:
+      type: integer
+      description: Number of seconds to wait for the entire operation, default 24h
+      default: 86400
+    osd-num:
+      type: integer
+      description: The OSD number to change
+    target-weight:
+      description: The final weight desired for the OSD, please round to 3 decimal places.
+    stepsize:
+      description: The amount to change weight by each time.
+      default: '0.05'
