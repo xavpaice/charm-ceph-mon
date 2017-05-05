@@ -654,10 +654,18 @@ def update_nrpe_config():
     hostname = nrpe.get_nagios_hostname()
     current_unit = nrpe.get_nagios_unit_name()
     nrpe_setup = nrpe.NRPE(hostname=hostname)
+    check_cmd = 'check_ceph_status.py -f {} --degraded_thresh {}' \
+        ' --misplaced_thresh {}' \
+        ' --recovery_rate {}'.format(STATUS_FILE,
+                                     config('nagios_degraded_thresh'),
+                                     config('nagios_misplaced_thresh'),
+                                     config('nagios_recovery_rate'))
+    if config('nagios_ignore_nodeepscub'):
+        check_cmd = check_cmd + ' --ignore_nodeepscrub'
     nrpe_setup.add_check(
         shortname="ceph",
         description='Check Ceph health {%s}' % current_unit,
-        check_cmd='check_ceph_status.py -f {}'.format(STATUS_FILE)
+        check_cmd=check_cmd
     )
     nrpe_setup.write()
 

@@ -44,7 +44,11 @@ CHARM_CONFIG = {'config-flags': '',
                 'osd-format': 'ext4',
                 'monitor-hosts': '',
                 'prefer-ipv6': False,
-                'default-rbd-features': None}
+                'default-rbd-features': None,
+                'nagios_degraded_thresh': '1',
+                'nagios_misplaced_thresh': '10',
+                'nagios_recovery_rate': '1',
+                'nagios_ignore_nodeepscub': False}
 
 
 class CephHooksTestCase(unittest.TestCase):
@@ -168,7 +172,10 @@ class CephHooksTestCase(unittest.TestCase):
                     'use_syslog': 'true'}
         self.assertEqual(ctxt, expected)
 
-    def test_nrpe_dependency_installed(self):
+    @patch.object(ceph_hooks, 'config')
+    def test_nrpe_dependency_installed(self, mock_config):
+        config = copy.deepcopy(CHARM_CONFIG)
+        mock_config.side_effect = lambda key: config[key]
         with patch.multiple(ceph_hooks,
                             apt_install=DEFAULT,
                             rsync=DEFAULT,
@@ -179,7 +186,12 @@ class CephHooksTestCase(unittest.TestCase):
         mocks["apt_install"].assert_called_once_with(
             ["python-dbus", "lockfile-progs"])
 
-    def test_upgrade_charm_with_nrpe_relation_installs_dependencies(self):
+    @patch.object(ceph_hooks, 'config')
+    def test_upgrade_charm_with_nrpe_relation_installs_dependencies(
+            self,
+            mock_config):
+        config = copy.deepcopy(CHARM_CONFIG)
+        mock_config.side_effect = lambda key: config[key]
         with patch.multiple(
                 ceph_hooks,
                 apt_install=DEFAULT,

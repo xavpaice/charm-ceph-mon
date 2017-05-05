@@ -195,6 +195,22 @@ options:
     description: |
       A comma-separated list of nagios servicegroups. If left empty, the
       nagios_context will be used as the servicegroup.
+  nagios_degraded_thresh:
+    default: 1.0
+    type: float
+    description: "Threshold for degraded ratio (0.1 = 10%)"
+  nagios_misplaced_thresh:
+    default: 10.0
+    type: float
+    description: "Threshold for misplaced ratio (0.1 = 10%)"
+  nagios_recovery_rate:
+    default: '1'
+    type: string
+    description: Recovery rate below which we consider recovery to be stalled
+  nagios_ignore_nodeepscub:
+    default: False
+    type: boolean
+    description: Whether to ignore the nodeep-scrub flag
   use-direct-io:
     type: boolean
     default: True

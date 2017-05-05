@@ -1,0 +1,177 @@
+{
+  "health": {
+    "health": {
+      "health_services": [
+        {
+          "mons": [
+            {
+              "name": "node1",
+              "kb_total": 140956600,
+              "kb_used": 15916132,
+              "kb_avail": 117857208,
+              "avail_percent": 83,
+              "last_updated": "2017-05-17 03:23:11.248297",
+              "store_stats": {
+                "bytes_total": 140014259,
+                "bytes_sst": 0,
+                "bytes_log": 13670758,
+                "bytes_misc": 126343501,
+                "last_updated": "0.000000"
+              },
+              "health": "HEALTH_OK"
+            },
+            {
+              "name": "node2",
+              "kb_total": 70395920,
+              "kb_used": 10532504,
+              "kb_avail": 56264436,
+              "avail_percent": 79,
+              "last_updated": "2017-05-17 03:23:16.952673",
+              "store_stats": {
+                "bytes_total": 315512452,
+                "bytes_sst": 0,
+                "bytes_log": 21691698,
+                "bytes_misc": 293820754,
+                "last_updated": "0.000000"
+              },
+              "health": "HEALTH_OK"
+            },
+            {
+              "name": "juju-machine-85-lxc-10",
+              "kb_total": 131927524,
+              "kb_used": 79521024,
+              "kb_avail": 45954016,
+              "avail_percent": 34,
+              "last_updated": "2017-05-17 03:23:13.794034",
+              "store_stats": {
+                "bytes_total": 89036349,
+                "bytes_sst": 0,
+                "bytes_log": 21055337,
+                "bytes_misc": 67981012,
+                "last_updated": "0.000000"
+              },
+              "health": "HEALTH_OK"
+            }
+          ]
+        }
+      ]
+    },
+    "timechecks": {
+      "epoch": 280,
+      "round": 19874,
+      "round_status": "finished",
+      "mons": [
+        {
+          "name": "node1",
+          "skew": "0.000000",
+          "latency": "0.000000",
+          "health": "HEALTH_OK"
+        },
+        {
+          "name": "node2",
+          "skew": "-0.000000",
+          "latency": "0.000866",
+          "health": "HEALTH_OK"
+        },
+        {
+          "name": "juju-machine-85-lxc-10",
+          "skew": "-0.000000",
+          "latency": "0.018848",
+          "health": "HEALTH_OK"
+        }
+      ]
+    },
+    "summary": [
+      {
+        "severity": "HEALTH_WARN",
+        "summary": "nodeep-scrub flag(s) set"
+      }
+    ],
+    "overall_status": "HEALTH_WARN",
+    "detail": []
+  },
+  "fsid": "some_fsid",
+  "election_epoch": 280,
+  "quorum": [
+    0,
+    1,
+    2
+  ],
+  "quorum_names": [
+    "node1",
+    "node2",
+    "juju-machine-85-lxc-10"
+  ],
+  "monmap": {
+    "epoch": 3,
+    "fsid": "some_fsid",
+    "modified": "2016-11-25 00:08:51.235813",
+    "created": "0.000000",
+    "mons": [
+      {
+        "rank": 0,
+        "name": "node1",
+        "addr": "10.24.0.15:6789/0"
+      },
+      {
+        "rank": 1,
+        "name": "node2",
+        "addr": "10.24.0.17:6789/0"
+      },
+      {
+        "rank": 2,
+        "name": "juju-machine-85-lxc-10",
+        "addr": "10.24.0.195:6789/0"
+      }
+    ]
+  },
+  "osdmap": {
+    "osdmap": {
+      "epoch": 37820,
+      "num_osds": 46,
+      "num_up_osds": 46,
+      "num_in_osds": 46,
+      "full": false,
+      "nearfull": false
+    }
+  },
+  "pgmap": {
+    "pgs_by_state": [
+      {
+        "state_name": "active+clean",
+        "count": 1988
+      },
+      {
+        "state_name": "active+remapped+wait_backfill",
+        "count": 3
+      },
+      {
+        "state_name": "active+remapped+backfilling",
+        "count": 1
+      }
+    ],
+    "version": 58873447,
+    "num_pgs": 1992,
+    "data_bytes": 35851846298041,
+    "bytes_used": 107730678743040,
+    "bytes_avail": 63413590548480,
+    "bytes_total": 171144269291520,
+    "degraded_objects": 0,
+    "degraded_total": 25759217,
+    "degraded_ratio": 0,
+    "recovering_objects_per_sec": 17,
+    "recovering_bytes_per_sec": 72552794,
+    "recovering_keys_per_sec": 0,
+    "read_bytes_sec": 23935944,
+    "write_bytes_sec": 7024503,
+    "op_per_sec": 5332
+  },
+  "mdsmap": {
+    "epoch": 1,
+    "up": 0,
+    "in": 0,
+    "max": 1,
+    "by_rank": []
+  }
+}
+

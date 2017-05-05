@@ -15,4 +15,4 @@ if [ ! -d $DATA_DIR ]; then
     mkdir -p $DATA_DIR
 fi
 
-ceph status >${DATA_DIR}/cat-ceph-status.txt
+ceph status --format json >${DATA_DIR}/cat-ceph-status.txt
