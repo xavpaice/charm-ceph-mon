@@ -220,9 +220,10 @@ def config_changed():
     emit_cephconf()
 
     # Support use of single node ceph
-    if not ceph.is_bootstrapped() and int(config('monitor-count')) == 1:
+    if (not ceph.is_bootstrapped() and int(config('monitor-count')) == 1 and
+            is_leader()):
         status_set('maintenance', 'Bootstrapping single Ceph MON')
-        ceph.bootstrap_monitor_cluster(config('monitor-secret'))
+        ceph.bootstrap_monitor_cluster(leader_get('monitor-secret'))
         ceph.wait_for_bootstrap()
 
 
