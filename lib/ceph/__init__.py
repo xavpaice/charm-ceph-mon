@@ -1314,6 +1314,27 @@ def bootstrap_monitor_cluster(secret):
             os.unlink(keyring)
 
 
+def bootstrap_manager():
+    hostname = socket.gethostname()
+    path = '/var/lib/ceph/mgr/ceph-{}'.format(hostname)
+    keyring = os.path.join(path, 'keyring')
+
+    if os.path.exists(keyring):
+        log('bootstrap_manager: mgr already initialized.')
+    else:
+        mkdir(path, owner=ceph_user(), group=ceph_user())
+        subprocess.check_call(['ceph', 'auth', 'get-or-create',
+                               'mgr.{}'.format(hostname), 'mon',
+                               'allow profile mgr', 'osd', 'allow *',
+                               'mds', 'allow *', '--out-file',
+                               keyring])
+        chownr(path, ceph_user(), ceph_user())
+
+        unit = 'ceph-mgr@{}'.format(hostname)
+        subprocess.check_call(['systemctl', 'enable', unit])
+        service_restart(unit)
+
+
 def update_monfs():
     hostname = socket.gethostname()
     monfs = '/var/lib/ceph/mon/ceph-{}'.format(hostname)
@@ -1355,16 +1376,17 @@ def find_least_used_journal(journal_devices):
 
 
 def osdize(dev, osd_format, osd_journal, reformat_osd=False,
-           ignore_errors=False, encrypt=False):
+           ignore_errors=False, encrypt=False, bluestore=False):
     if dev.startswith('/dev'):
         osdize_dev(dev, osd_format, osd_journal,
-                   reformat_osd, ignore_errors, encrypt)
+                   reformat_osd, ignore_errors, encrypt,
+                   bluestore)
     else:
         osdize_dir(dev, encrypt)
 
 
 def osdize_dev(dev, osd_format, osd_journal, reformat_osd=False,
-               ignore_errors=False, encrypt=False):
+               ignore_errors=False, encrypt=False, bluestore=False):
     if not os.path.exists(dev):
         log('Path {} does not exist - bailing'.format(dev))
         return
@@ -1392,9 +1414,16 @@ def osdize_dev(dev, osd_format, osd_journal, reformat_osd=False,
         if osd_format:
             cmd.append('--fs-type')
             cmd.append(osd_format)
+
         if reformat_osd:
             cmd.append('--zap-disk')
+
+        # NOTE(jamespage): enable experimental bluestore support
+        if cmp_pkgrevno('ceph', '10.2.0') >= 0 and bluestore:
+            cmd.append('--bluestore')
+
         cmd.append(dev)
+
         if osd_journal:
             least_used = find_least_used_journal(osd_journal)
             cmd.append(least_used)

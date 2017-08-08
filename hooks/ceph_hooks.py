@@ -16,6 +16,7 @@
 
 import os
 import subprocess
+import socket
 import sys
 import uuid
 
@@ -225,6 +226,9 @@ def config_changed():
         status_set('maintenance', 'Bootstrapping single Ceph MON')
         ceph.bootstrap_monitor_cluster(leader_get('monitor-secret'))
         ceph.wait_for_bootstrap()
+        if cmp_pkgrevno('ceph', '12.0.0') >= 0:
+            status_set('maintenance', 'Bootstrapping single Ceph MGR')
+            ceph.bootstrap_manager()
 
 
 def get_mon_hosts():
@@ -280,6 +284,9 @@ def mon_relation():
         ceph.bootstrap_monitor_cluster(leader_get('monitor-secret'))
         ceph.wait_for_bootstrap()
         ceph.wait_for_quorum()
+        if cmp_pkgrevno('ceph', '12.0.0') >= 0:
+            status_set('maintenance', 'Bootstrapping Ceph MGR')
+            ceph.bootstrap_manager()
         # If we can and want to
         if is_leader() and config('customize-failure-domain'):
             # But only if the environment supports it
@@ -547,6 +554,8 @@ def start():
         service_restart('ceph-mon')
     else:
         service_restart('ceph-mon-all')
+    if cmp_pkgrevno('ceph', '12.0.0') >= 0:
+        service_restart('ceph-mgr@{}'.format(socket.gethostname()))
 
 
 @hooks.hook('nrpe-external-master-relation-joined')
