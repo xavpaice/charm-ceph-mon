@@ -230,6 +230,12 @@ crushmap-update:
   additionalProperties: false
 show-disk-free:
   description: Show disk utilization by host and OSD.
+  params:
+    format:
+      type: string
+      enum: [json, json-pretty, xml, xml-pretty, plain]
+      default: "plain"
+      description: Output format, either json, json-pretty, xml, xml-pretty, plain; defaults to plain
   additionalProperties: false
 set-noout:
   description: Set ceph noout across the cluster.

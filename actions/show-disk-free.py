@@ -18,12 +18,14 @@ import sys
 
 sys.path.append('hooks')
 from subprocess import check_output, CalledProcessError
-from charmhelpers.core.hookenv import log, action_set, action_fail
+from charmhelpers.core.hookenv import log, action_get, action_set, action_fail
 
 if __name__ == '__main__':
+    # constrained to enum: json,json-pretty,xml,xml-pretty,plain
+    fmt = action_get("format")
     try:
         out = check_output(['ceph', '--id', 'admin',
-                            'osd', 'df', 'tree']).decode('UTF-8')
+                            'osd', 'df', 'tree', '-f', fmt]).decode('UTF-8')
         action_set({'message': out})
     except CalledProcessError as e:
         log(e)

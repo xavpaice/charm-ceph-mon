@@ -17,6 +17,7 @@
 import amulet
 import re
 import time
+import json
 
 from charmhelpers.contrib.openstack.amulet.deployment import (
     OpenStackAmuletDeployment
@@ -117,7 +118,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         # Include a non-existent device as osd-devices is a whitelist,
         # and this will catch cases where proposals attempt to change that.
         ceph_osd_config = {
-            'osd-reformat': 'yes',
+            'osd-reformat': True,
             'ephemeral-unmount': '/mnt',
             'osd-devices': '/dev/vdb /srv/ceph /dev/test-non-existent'
         }
@@ -715,6 +716,27 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         sentry_unit = self.ceph0_sentry
         action_id = u.run_action(sentry_unit, 'get-health')
         assert u.wait_on_action(action_id), "HEALTH_OK"
+
+    def test_420_show_disk_free_action(self):
+        """Verify show-disk-free"""
+        u.log.debug("Testing show-disk-free")
+        if self._get_openstack_release() < self.trusty_kilo:
+            u.log.info(
+                "show-disk-free only supported in >=kilo, skipping")
+            return
+        sentry_unit = self.ceph0_sentry
+        action_id = u.run_action(sentry_unit,
+                                 'show-disk-free',
+                                 params={'format': 'json'})
+        assert u.wait_on_action(action_id), "Show-disk-free action failed."
+        data = amulet.actions.get_action_output(action_id, full_output=True)
+        assert data.get(u"status") == "completed", "Show-disk-free failed"
+        message = data.get(u"results").get(u"message")
+        assert message is not None
+        jsonout = json.loads(message.strip())
+        nodes = jsonout.get(u"nodes")
+        assert nodes is not None, "Show-disk-free: no 'nodes' elem"
+        assert len(nodes) > 0, "Show-disk-free action: 0 nodes"
 
     def test_499_ceph_cmds_exit_zero(self):
         """Check basic functionality of ceph cli commands against
