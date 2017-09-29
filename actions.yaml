@@ -229,3 +229,7 @@ crushmap-update:
 show-disk-free:
   description: Show disk utilization by host and OSD.
   additionalProperties: false
+set-noout:
+  description: Set ceph noout across the cluster.
+unset-noout:
+  description: Unset ceph noout across the cluster.

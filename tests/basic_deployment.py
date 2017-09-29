@@ -568,6 +568,27 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         assert "cache_mode" not in pool_line, \
             "cache_mode is still enabled on cache pool"
 
+    def test_404_set_noout_actions(self):
+        """Verify that set/unset noout works"""
+        u.log.debug("Testing set noout")
+        cmd = "ceph -s"
+
+        sentry_unit = self.ceph0_sentry
+        action_id = u.run_action(sentry_unit, 'set-noout')
+        assert u.wait_on_action(action_id), "Set noout action failed."
+
+        output, code = sentry_unit.run(cmd)
+        if 'noout' not in output:
+            amulet.raise_status(amulet.FAIL, msg="Missing noout")
+
+        u.log.debug("Testing unset noout")
+        action_id = u.run_action(sentry_unit, 'unset-noout')
+        assert u.wait_on_action(action_id), "Unset noout action failed."
+
+        output, code = sentry_unit.run(cmd)
+        if 'noout' in output:
+            amulet.raise_status(amulet.FAIL, msg="Still has noout")
+
     def test_410_ceph_cinder_vol_create(self):
         """Create and confirm a ceph-backed cinder volume, and inspect
         ceph cinder pool object count as the volume is created
