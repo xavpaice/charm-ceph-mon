@@ -37,3 +37,6 @@ provides:
   nrpe-external-master:
     interface: nrpe-external-master
     scope: container
+requires:
+  bootstrap-source:
+    interface: ceph-bootstrap
