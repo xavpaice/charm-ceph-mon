@@ -67,7 +67,8 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
             {'name': 'rabbitmq-server'},
             {'name': 'nova-compute'},
             {'name': 'glance'},
-            {'name': 'cinder'}
+            {'name': 'cinder'},
+            {'name': 'cinder-ceph'},
         ]
         super(CephBasicDeployment, self)._add_services(this_service,
                                                        other_services)
@@ -88,8 +89,9 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
             'cinder:identity-service': 'keystone:identity-service',
             'cinder:amqp': 'rabbitmq-server:amqp',
             'cinder:image-service': 'glance:image-service',
-            'cinder:ceph': 'ceph-mon:client',
-            'ceph-osd:mon': 'ceph-mon:osd'
+            'cinder-ceph:storage-backend': 'cinder:storage-backend',
+            'cinder-ceph:ceph': 'ceph-mon:client',
+            'ceph-osd:mon': 'ceph-mon:osd',
         }
         super(CephBasicDeployment, self)._add_relations(relations)
 
@@ -136,6 +138,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         self.nova_sentry = self.d.sentry['nova-compute'][0]
         self.glance_sentry = self.d.sentry['glance'][0]
         self.cinder_sentry = self.d.sentry['cinder'][0]
+        self.cinder_ceph_sentry = self.d.sentry['cinder-ceph'][0]
         self.ceph_osd_sentry = self.d.sentry['ceph-osd'][0]
         self.ceph0_sentry = self.d.sentry['ceph-mon'][0]
         self.ceph1_sentry = self.d.sentry['ceph-mon'][1]
@@ -316,7 +319,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         """Verify the ceph to cinder ceph-client relation data."""
         u.log.debug('Checking ceph:cinder ceph relation data...')
         unit = self.ceph2_sentry
-        relation = ['client', 'cinder:ceph']
+        relation = ['client', 'cinder-ceph:ceph']
         expected = {
             'private-address': u.valid_ip,
             'auth': 'none',
@@ -331,7 +334,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
     def test_205_cinder_ceph_client_relation(self):
         """Verify the cinder to ceph ceph-client relation data."""
         u.log.debug('Checking cinder:ceph ceph relation data...')
-        unit = self.cinder_sentry
+        unit = self.cinder_ceph_sentry
         relation = ['ceph', 'ceph-mon:client']
         expected = {
             'private-address': u.valid_ip
@@ -377,12 +380,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         u.log.debug('Checking cinder (rbd) config file data...')
         unit = self.cinder_sentry
         conf = '/etc/cinder/cinder.conf'
-        # NOTE(jamespage): Deal with section config for >= ocata.
-        if self._get_openstack_release() >= self.xenial_ocata:
-            section_key = 'CEPH'
-        else:
-            section_key = 'DEFAULT'
-
+        section_key = 'cinder-ceph'
         expected = {
             section_key: {
                 'volume_driver': 'cinder.volume.drivers.rbd.RBDDriver'
@@ -578,7 +576,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         obj_count_samples = []
         pool_size_samples = []
         pools = u.get_ceph_pools(self.ceph0_sentry)
-        cinder_pool = pools['cinder']
+        cinder_pool = pools['cinder-ceph']
 
         # Check ceph cinder pool object count, disk space usage and pool name
         u.log.debug('Checking ceph cinder pool original samples...')
@@ -587,7 +585,7 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         obj_count_samples.append(obj_count)
         pool_size_samples.append(kb_used)
 
-        expected = 'cinder'
+        expected = 'cinder-ceph'
         if pool_name != expected:
             msg = ('Ceph pool {} unexpected name (actual, expected): '
                    '{}. {}'.format(cinder_pool, pool_name, expected))
