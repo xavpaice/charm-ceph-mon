@@ -17,10 +17,11 @@
 from subprocess import CalledProcessError
 import sys
 
+sys.path.append('lib')
 sys.path.append('hooks')
 
 from charmhelpers.core.hookenv import action_get, log, action_fail
-from ceph_broker import handle_set_pool_value
+from ceph.broker import handle_set_pool_value
 
 if __name__ == '__main__':
     name = action_get("pool-name")
