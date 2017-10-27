@@ -60,7 +60,8 @@ def pool_get():
     key = action_get("key")
     pool_name = action_get("pool_name")
     try:
-        value = check_output(['ceph', 'osd', 'pool', 'get', pool_name, key])
+        value = (check_output(['ceph', 'osd', 'pool', 'get', pool_name, key])
+                 .decode('UTF-8'))
         return value
     except CalledProcessError as e:
         action_fail(e.message)

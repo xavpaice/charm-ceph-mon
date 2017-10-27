@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Canonical Ltd
 #
@@ -254,8 +254,7 @@ def get_mon_hosts():
                 hosts.append('{}:6789'.format(
                     format_ipv6_addr(addr) or addr))
 
-    hosts.sort()
-    return hosts
+    return sorted(hosts)
 
 
 def get_peer_units():
@@ -308,7 +307,7 @@ def bootstrap_source_relation_changed():
             if not (mon_secret and fsid):
                 log('Relation data is not ready as the fsid or the '
                     'monitor-secret are missing from the relation: '
-                    'mon_secret = %s and fsid = %s ' % (mon_secret, fsid))
+                    'mon_secret = {} and fsid = {} '.format(mon_secret, fsid))
                 continue
 
             if not (curr_fsid or curr_secret):
@@ -319,10 +318,10 @@ def bootstrap_source_relation_changed():
                 # will fail to join the mon cluster. If they don't,
                 # bail because something needs to be investigated.
                 assert curr_fsid == fsid, \
-                    "bootstrap fsid '%s' != current fsid '%s'" % (
+                    "bootstrap fsid '{}' != current fsid '{}'".format(
                         fsid, curr_fsid)
                 assert curr_secret == mon_secret, \
-                    "bootstrap secret '%s' != current secret '%s'" % (
+                    "bootstrap secret '{}' != current secret '{}'".format(
                         mon_secret, curr_secret)
 
             opts = {
@@ -331,7 +330,7 @@ def bootstrap_source_relation_changed():
             }
 
             log('Updating leader settings for fsid and monitor-secret '
-                'from remote relation data: %s' % opts)
+                'from remote relation data: {}'.format(opts))
             leader_set(opts)
 
     # The leader unit needs to bootstrap itself as it won't receive the
@@ -664,7 +663,7 @@ def update_nrpe_config():
         check_cmd = check_cmd + ' --ignore_nodeepscrub'
     nrpe_setup.add_check(
         shortname="ceph",
-        description='Check Ceph health {%s}' % current_unit,
+        description='Check Ceph health {{{}}}'.format(current_unit),
         check_cmd=check_cmd
     )
     nrpe_setup.write()
@@ -693,7 +692,7 @@ def assess_status():
         return
 
     # mon_count > 1, peers, but no ceph-public-address
-    ready = sum(1 for unit_ready in units.itervalues() if unit_ready)
+    ready = sum(1 for unit_ready in units.values() if unit_ready)
     if ready < moncount:
         status_set('waiting', 'Peer units detected, waiting for addresses')
         return

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2005, 2006, 2007, 2012 James Troup <james.troup@canonical.com>
 # Copyright (C) 2014, 2017 Canonical
@@ -97,9 +97,10 @@ def check_ceph_status(args):
         status_data = json.loads(tree)
     else:
         try:
-            tree = subprocess.check_output(['ceph',
-                                            'status',
-                                            '--format', 'json'])
+            tree = (subprocess.check_output(['ceph',
+                                             'status',
+                                             '--format', 'json'])
+                    .decode('UTF-8'))
         except subprocess.CalledProcessError as e:
             raise UnknownError(
                 "UNKNOWN: ceph status command failed with error: {}".format(e))
