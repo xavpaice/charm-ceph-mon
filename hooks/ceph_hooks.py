@@ -409,6 +409,8 @@ def notify_radosgws():
 def notify_client():
     for relid in relation_ids('client'):
         client_relation_joined(relid)
+        for unit in related_units(relid):
+            client_relation_changed(relid, unit)
     for relid in relation_ids('admin'):
         admin_relation_joined(relid)
     for relid in relation_ids('mds'):
@@ -585,10 +587,12 @@ def client_relation_joined(relid=None):
 
 
 @hooks.hook('client-relation-changed')
-def client_relation_changed():
+def client_relation_changed(relid=None, unit=None):
     """Process broker requests from ceph client relations."""
     if ceph.is_quorum():
-        settings = relation_get()
+        if not unit:
+            unit = remote_unit()
+        settings = relation_get(rid=relid, unit=unit)
         if 'broker_req' in settings:
             if not ceph.is_leader():
                 log("Not leader - ignoring broker request", level=DEBUG)
@@ -602,7 +606,8 @@ def client_relation_changed():
                     'broker_rsp': rsp,
                     unit_response_key: rsp,
                 }
-                relation_set(relation_settings=data)
+                relation_set(relation_id=relid,
+                             relation_settings=data)
     else:
         log('mon cluster not in quorum', level=DEBUG)
 
