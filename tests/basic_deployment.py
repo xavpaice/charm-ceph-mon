@@ -708,6 +708,14 @@ class CephBasicDeployment(OpenStackAmuletDeployment):
         if ret:
             amulet.raise_status(amulet.FAIL, msg=ret)
 
+    def test_414_get_health_action(self):
+        """Verify that getting health works"""
+        u.log.debug("Testing get-health")
+
+        sentry_unit = self.ceph0_sentry
+        action_id = u.run_action(sentry_unit, 'get-health')
+        assert u.wait_on_action(action_id), "HEALTH_OK"
+
     def test_499_ceph_cmds_exit_zero(self):
         """Check basic functionality of ceph cli commands against
         all ceph units."""
