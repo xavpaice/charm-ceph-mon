@@ -31,10 +31,10 @@ def delete_erasure_profile():
     try:
         remove_erasure_profile(service='admin', profile_name=name)
     except CalledProcessError as e:
-        log("Remove erasure profile failed with error {}".format(e.message),
+        log("Remove erasure profile failed with error {}".format(str(e)),
             level="ERROR")
-        action_fail("Remove erasure profile failed with error: {}".format(
-            e.message))
+        action_fail("Remove erasure profile failed with error: {}"
+                    .format(str(e)))
 
 
 if __name__ == '__main__':

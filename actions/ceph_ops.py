@@ -53,7 +53,7 @@ def list_pools():
             rados.NoData,
             rados.NoSpace,
             rados.PermissionError) as e:
-        action_fail(e.message)
+        action_fail(str(e))
 
 
 def pool_get():
@@ -64,7 +64,7 @@ def pool_get():
                  .decode('UTF-8'))
         return value
     except CalledProcessError as e:
-        action_fail(e.message)
+        action_fail(str(e))
 
 
 def set_pool():
@@ -89,7 +89,7 @@ def pool_stats():
             rados.NoData,
             rados.NoSpace,
             rados.PermissionError) as e:
-        action_fail(e.message)
+        action_fail(str(e))
 
 
 def delete_pool_snapshot():

@@ -30,4 +30,4 @@ if __name__ == '__main__':
         action_set({'message': out})
     except CalledProcessError as e:
         log(e)
-        action_fail("Pool get failed with message: {}".format(e.message))
+        action_fail("Pool get failed with message: {}".format(str(e)))

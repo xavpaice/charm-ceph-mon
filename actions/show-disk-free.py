@@ -28,5 +28,4 @@ if __name__ == '__main__':
     except CalledProcessError as e:
         log(e)
         action_fail(
-            "ceph osd df tree failed with message: {}".format(e.message)
-        )
+            "ceph osd df tree failed with message: {}".format(str(e)))

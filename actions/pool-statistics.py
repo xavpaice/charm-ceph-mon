@@ -27,4 +27,4 @@ if __name__ == '__main__':
         action_set({'message': out})
     except CalledProcessError as e:
         log(e)
-        action_fail("ceph df failed with message: {}".format(e.message))
+        action_fail("ceph df failed with message: {}".format(str(e)))

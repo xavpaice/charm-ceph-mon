@@ -28,4 +28,4 @@ if __name__ == '__main__':
         set_pool_quota(service='admin', pool_name=name, max_bytes=max_bytes)
     except CalledProcessError as e:
         log(e)
-        action_fail("Set pool quota failed with message: {}".format(e.message))
+        action_fail("Set pool quota failed with message: {}".format(str(e)))

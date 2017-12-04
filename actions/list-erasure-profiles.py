@@ -32,5 +32,5 @@ if __name__ == '__main__':
         action_set({'message': out})
     except CalledProcessError as e:
         log(e)
-        action_fail("Listing erasure profiles failed with error: {}".format(
-            e.message))
+        action_fail("Listing erasure profiles failed with error: {}"
+                    .format(str(e)))

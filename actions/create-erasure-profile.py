@@ -46,7 +46,7 @@ def make_erasure_profile():
         except CalledProcessError as e:
             log(e)
             action_fail("Create erasure profile failed with "
-                        "message: {}".format(e.message))
+                        "message: {}".format(str(e)))
     elif plugin == "isa":
         k = action_get("data-chunks")
         m = action_get("coding-chunks")
@@ -60,7 +60,7 @@ def make_erasure_profile():
         except CalledProcessError as e:
             log(e)
             action_fail("Create erasure profile failed with "
-                        "message: {}".format(e.message))
+                        "message: {}".format(str(e)))
     elif plugin == "local":
         k = action_get("data-chunks")
         m = action_get("coding-chunks")
@@ -76,7 +76,7 @@ def make_erasure_profile():
         except CalledProcessError as e:
             log(e)
             action_fail("Create erasure profile failed with "
-                        "message: {}".format(e.message))
+                        "message: {}".format(str(e)))
     elif plugin == "shec":
         k = action_get("data-chunks")
         m = action_get("coding-chunks")
@@ -92,7 +92,7 @@ def make_erasure_profile():
         except CalledProcessError as e:
             log(e)
             action_fail("Create erasure profile failed with "
-                        "message: {}".format(e.message))
+                        "message: {}".format(str(e)))
     else:
         # Unknown erasure plugin
         action_fail("Unknown erasure-plugin type of {}. "

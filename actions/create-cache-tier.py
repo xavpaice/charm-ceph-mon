@@ -45,10 +45,10 @@ def make_cache_tier():
     try:
         pool.add_cache_tier(cache_pool=cache_pool, mode=cache_mode)
     except CalledProcessError as err:
-        log("Add cache tier failed with message: {}".format(
-            err.message))
+        log("Add cache tier failed with message: {}"
+            .format(str(err)))
         action_fail("create-cache-tier failed.  Add cache tier failed with "
-                    "message: {}".format(err.message))
+                    "message: {}".format(str(err)))
 
 
 if __name__ == '__main__':
