@@ -34,6 +34,6 @@ if __name__ == '__main__':
     try:
         handle_set_pool_value(service='admin', request=request)
     except CalledProcessError as e:
-        log(e.message)
+        log(str(e))
         action_fail("Setting pool key: {} and value: {} failed with "
-                    "message: {}".format(key, value, e.message))
+                    "message: {}".format(key, value, str(e)))

@@ -46,10 +46,9 @@ def delete_cache_tier():
     try:
         pool.remove_cache_tier(cache_pool=cache_pool)
     except CalledProcessError as err:
-        log("Removing the cache tier failed with message: {}".format(
-            err.message))
+        log("Removing the cache tier failed with message: {}".format(str(err)))
         action_fail("remove-cache-tier failed. Removing the cache tier failed "
-                    "with message: {}".format(err.message))
+                    "with message: {}".format(str(err)))
 
 
 if __name__ == '__main__':

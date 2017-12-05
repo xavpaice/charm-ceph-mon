@@ -28,4 +28,4 @@ if __name__ == '__main__':
         rename_pool(service='admin', old_name=name, new_name=new_name)
     except CalledProcessError as e:
         log(e)
-        action_fail("Renaming pool failed with message: {}".format(e.message))
+        action_fail("Renaming pool failed with message: {}".format(str(e)))

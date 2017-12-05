@@ -30,5 +30,5 @@ if __name__ == '__main__':
                              snapshot_name=snapname)
     except CalledProcessError as e:
         log(e)
-        action_fail("Remove pool snapshot failed with message: {}".format(
-            e.message))
+        action_fail("Remove pool snapshot failed with message: {}"
+                    .format(str(e)))

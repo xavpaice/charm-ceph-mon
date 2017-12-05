@@ -46,7 +46,7 @@ def create_pool():
                         "is allowed".format(pool_type))
     except CalledProcessError as e:
         action_fail("Pool creation failed because of a failed process. "
-                    "Ret Code: {} Message: {}".format(e.returncode, e.message))
+                    "Ret Code: {} Message: {}".format(e.returncode, str(e)))
 
 
 if __name__ == '__main__':
