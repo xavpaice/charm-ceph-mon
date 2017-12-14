@@ -598,7 +598,7 @@ def client_relation_changed(relid=None, unit=None):
                 log("Not leader - ignoring broker request", level=DEBUG)
             else:
                 rsp = process_requests(settings['broker_req'])
-                unit_id = remote_unit().replace('/', '-')
+                unit_id = unit.replace('/', '-')
                 unit_response_key = 'broker-rsp-' + unit_id
                 # broker_rsp is being left for backward compatibility,
                 # unit_response_key superscedes it

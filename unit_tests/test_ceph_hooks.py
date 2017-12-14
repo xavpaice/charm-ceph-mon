@@ -251,6 +251,39 @@ class RelatedUnitsTestCase(unittest.TestCase):
             call('osd:23')
         ])
 
+    @patch.object(ceph_hooks.ceph, 'is_quorum')
+    @patch.object(ceph_hooks, 'remote_unit')
+    @patch.object(ceph_hooks, 'relation_get')
+    @patch.object(ceph_hooks.ceph, 'is_leader')
+    @patch.object(ceph_hooks, 'process_requests')
+    @patch.object(ceph_hooks, 'relation_set')
+    def test_client_relation_changed_non_rel_hook(self, relation_set,
+                                                  process_requests,
+                                                  is_leader,
+                                                  relation_get,
+                                                  remote_unit,
+                                                  is_quorum):
+        # Check for LP #1738154
+        process_requests.return_value = 'AOK'
+        is_leader.return_value = True
+        relation_get.return_value = {'broker_req': 'req'}
+        remote_unit.return_value = None
+        is_quorum.return_value = True
+        ceph_hooks.client_relation_changed(relid='rel1', unit='glance/0')
+        relation_set.assert_called_once_with(
+            relation_id='rel1',
+            relation_settings={
+                'broker-rsp-glance-0': 'AOK',
+                'broker_rsp': 'AOK'})
+        relation_set.reset_mock()
+        remote_unit.return_value = 'glance/0'
+        ceph_hooks.client_relation_changed()
+        relation_set.assert_called_once_with(
+            relation_id=None,
+            relation_settings={
+                'broker-rsp-glance-0': 'AOK',
+                'broker_rsp': 'AOK'})
+
 
 class BootstrapSourceTestCase(test_utils.CharmTestCase):
 
