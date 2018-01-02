@@ -32,7 +32,7 @@ class NagiosTestCase(unittest.TestCase):
         mock_subprocess.return_value = tree.encode('UTF-8')
         args = check_ceph_status.parse_args(['--degraded_thresh', '1'])
         check_output = check_ceph_status.check_ceph_status(args)
-        self.assertRegexpMatches(check_output, r"^All OK$")
+        self.assertRegex(check_output, r"^All OK$")
 
     def test_health_warn(self, mock_subprocess):
         with open('unit_tests/ceph_warn.json') as f:
