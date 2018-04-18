@@ -68,6 +68,23 @@ def check_file_freshness(filename, newer_than=3600):
                             % (filename, time.ctime(mtime)))
 
 
+def get_ceph_version():
+    """
+    Uses CLI to get the ceph version, because the status output changes from
+    Luminous onwards (12.2.0 or higher)
+
+    :returns: list of integers, just the actual version number
+    """
+    try:
+        out_string = subprocess.check_output(['ceph',
+                                              '--version']).decode('UTF-8')
+    except subprocess.CalledProcessError as e:
+        raise UnknownError(
+            "UNKNOWN: could not determine Ceph version, error: {}".format(e))
+    out_version = [int(x) for x in out_string.split(" ")[2].split(".")]
+    return out_version
+
+
 def check_ceph_status(args):
     """
     Used to check the status of a Ceph cluster.  Uses the output of 'ceph
@@ -109,15 +126,27 @@ def check_ceph_status(args):
     required_keys = ['health', 'monmap', 'pgmap']
     if not all(key in status_data.keys() for key in required_keys):
         raise UnknownError('UNKNOWN: status data is incomplete')
+    ceph_version = get_ceph_version()
+    if ceph_version[0] >= 12 and ceph_version[1] >= 2:
+        # This is Luminous or above
+        overall_status = status_data['health'].get('status')
+        luminous = True
+    else:
+        overall_status = status_data['health'].get('overall_status')
+        luminous = False
 
-    if status_data['health']['overall_status'] != 'HEALTH_OK':
+    if overall_status != 'HEALTH_OK':
         # Health is not OK, check if any lines are not in our list of OK
         # any lines that don't match, check is critical
         status_msg = []
-        for status in status_data['health']['summary']:
-            if not re.match(ignorable, status['summary']):
+        if luminous:
+            status_messages = [x['summary']['message'] for x in status_data['health'].get('checks').values()]
+        else:
+            status_messages = [x['summary'] for x in status_data['health']['summary']]
+        for status in status_messages:
+            if not re.match(ignorable, status):
                 status_critical = True
-                status_msg.append(status['summary'])
+                status_msg.append(status)
         # If we got this far, then the status is not OK but the status lines
         # are all in our list of things we consider to be operational tasks.
         # Check the thresholds and return CRITICAL if exceeded,
@@ -138,10 +167,10 @@ def check_ceph_status(args):
             status_msg.append("Recovering objects/sec {}".format(recovering))
         if status_critical:
             msg = 'CRITICAL: ceph health: "{} {}"'.format(
-                  status_data['health']['overall_status'],
+                  overall_status,
                   ", ".join(status_msg))
             raise CriticalError(msg)
-        if status_data['health']['overall_status'] == 'HEALTH_WARN':
+        if  overall_status == 'HEALTH_WARN':
             msg = "WARNING: {}".format(", ".join(status_msg))
             raise WarnError(msg)
     message = "All OK"
